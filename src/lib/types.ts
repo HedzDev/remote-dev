@@ -7,3 +7,14 @@ export type JobItem = {
   relevanceScore: number;
   daysAgo: number;
 };
+
+export type JobItemExpanded = JobItem & {
+  coverImgURL: string;
+  companyURL: string;
+  description: string;
+  duration: string;
+  location: string;
+  qualifications: string[];
+  reviews: string[];
+  salary: string;
+};
