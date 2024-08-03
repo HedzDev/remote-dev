@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BASE_API_URL } from "./constants";
 import { JobItem, JobItemExpanded } from "./types";
-import { useQuery } from "@tanstack/react-query";
+import { handleError } from "./utils";
 
 export const useActiveId = () => {
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -45,50 +46,97 @@ export const useActiveId = () => {
 //   return { jobItem, isLoading } as const; // const syntax means that the return value is a tuple and it's immutable
 // };
 
+type JobItemAPIResponse = {
+  public: boolean;
+  jobItem: JobItemExpanded;
+};
+
+async function fetchJobItem(id: number | null): Promise<JobItemAPIResponse> {
+  const res = await fetch(`${BASE_API_URL}/${id}`);
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.description);
+  }
+
+  const data = await res.json();
+  return data;
+}
+
 export const useJobItem = (id: number | null) => {
-  const { data, isLoading } = useQuery(
+  const { data, isInitialLoading } = useQuery(
     ["job-items", id],
-    async () => {
-      if (!id) return;
-      const res = await fetch(`${BASE_API_URL}/${id}`);
-      const data = await res.json();
-      return data;
-    },
+    () => (id ? fetchJobItem(id) : null),
+
     {
-      enabled: Boolean(id),
+      enabled: Boolean(id), // only fetch data if id is truthy
       staleTime: 1000 * 60 * 60, // 1 hour
       refetchOnWindowFocus: false,
       retry: false,
-      onError: () => {},
+      onError: handleError,
     }
   );
 
-  console.log(data);
+  const isLoading = isInitialLoading;
 
   return { jobItem: data?.jobItem, isLoading } as const;
 };
 
+// export const useJobItems = (searchText: string) => {
+//   const [jobItems, setJobItems] = useState<JobItem[]>([]);
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   useEffect(() => {
+//     if (!searchText) return;
+
+//     const fetchData = async () => {
+//       setIsLoading(true);
+//       const res = await fetch(`${BASE_API_URL}?search=${searchText}`);
+//       const data = await res.json();
+//       setJobItems(data.jobItems);
+//       setIsLoading(false);
+//     };
+//     fetchData();
+//   }, [searchText]);
+
+//   return { jobItems, isLoading }; // const syntax means that the return value is a tuple and it's immutable
+// };
+type JobItemsAPIResponse = {
+  public: boolean;
+  sorted: boolean;
+  jobItems: JobItem[];
+};
+
+async function fetchJobItems(searchText: string): Promise<JobItemsAPIResponse> {
+  const res = await fetch(`${BASE_API_URL}?search=${searchText}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.description);
+  }
+
+  return data;
+}
+
 export const useJobItems = (searchText: string) => {
-  const [jobItems, setJobItems] = useState<JobItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, isInitialLoading } = useQuery(
+    // isInitialLoading is a boolean that indicates if the query is still in the initial loading state
+    ["job-items", searchText],
+    () => fetchJobItems(searchText),
+    {
+      enabled: Boolean(searchText), // only fetch data if searchText is truthy
+      staleTime: 1000 * 60 * 60, // 1 hour
+      refetchOnWindowFocus: false,
+      retry: false,
+      onError: handleError,
+    }
+  );
 
-  const totalNumberOfResults = jobItems.length;
-  const jobItemsSliced = jobItems.slice(0, 7);
+  const isLoading = isInitialLoading;
+  const jobItems = data?.jobItems || [];
 
-  useEffect(() => {
-    if (!searchText) return;
-
-    const fetchData = async () => {
-      setIsLoading(true);
-      const res = await fetch(`${BASE_API_URL}?search=${searchText}`);
-      const data = await res.json();
-      setJobItems(data.jobItems);
-      setIsLoading(false);
-    };
-    fetchData();
-  }, [searchText]);
-
-  return { jobItemsSliced, isLoading, totalNumberOfResults }; // const syntax means that the return value is a tuple and it's immutable
+  return { jobItems, isLoading } as const;
 };
 
 export const useDebounce = <T>(value: T, delay = 500): T => {

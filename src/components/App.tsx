@@ -13,12 +13,15 @@ import ResultsCount from "./ResultsCount";
 import SearchForm from "./SearchForm";
 import Sidebar, { SidebarTop } from "./Sidebar";
 import SortingControls from "./SortingControls";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText);
-  const { jobItemsSliced, isLoading, totalNumberOfResults } =
-    useJobItems(debouncedSearchText);
+  const { jobItems, isLoading } = useJobItems(debouncedSearchText);
+
+  const totalNumberOfResults = jobItems.length;
+  const jobItemsSliced = jobItems.slice(0, 7);
 
   return (
     <>
@@ -48,6 +51,8 @@ function App() {
       </Container>
 
       <Footer />
+
+      <Toaster position="top-right" />
     </>
   );
 }
