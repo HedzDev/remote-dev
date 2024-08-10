@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { BookmarksContext } from "../contexts/BookmarkContextProvider";
 import { BASE_API_URL } from "./constants";
 import { JobItem, JobItemExpanded } from "./types";
 import { handleError } from "./utils";
@@ -149,4 +150,16 @@ export const useDebounce = <T>(value: T, delay = 500): T => {
   }, [value, delay]);
 
   return debouncedValue;
+};
+
+export const useBookmark = () => {
+  const context = useContext(BookmarksContext);
+
+  if (!context) {
+    throw new Error(
+      "BookmarkContext must be used within BookmarkContextProvider"
+    );
+  }
+
+  return context;
 };

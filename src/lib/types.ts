@@ -18,3 +18,7 @@ export type JobItemExpanded = JobItem & {
   reviews: string[];
   salary: string;
 };
+
+export type SortByType = "relevant" | "recent";
+
+export type DirectionType = "next" | "previous";
