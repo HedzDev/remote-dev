@@ -162,6 +162,8 @@ export const useSearchQuery = (searchText: string) => {
   return { jobItems, isLoading } as const;
 };
 
+///--------------------------------------------------
+
 export const useDebounce = <T>(value: T, delay = 500): T => {
   // generic type T is used to make the function more flexible
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -172,18 +174,6 @@ export const useDebounce = <T>(value: T, delay = 500): T => {
   }, [value, delay]);
 
   return debouncedValue;
-};
-
-export const useBookmarkContext = () => {
-  const context = useContext(BookmarksContext);
-
-  if (!context) {
-    throw new Error(
-      "useBookmarkContext must be used within BookmarkContextProvider"
-    );
-  }
-
-  return context;
 };
 
 export const useLocalStorage = <T>(
@@ -199,4 +189,40 @@ export const useLocalStorage = <T>(
   }, [value, key]);
 
   return [value, setValue] as const;
+};
+
+export const useOnClickOutside = (
+  refs: React.RefObject<HTMLElement>[],
+  handler: () => void
+) => {
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        e.target instanceof HTMLElement &&
+        refs.every((ref) => !ref.current?.contains(e.target as Node))
+      ) {
+        handler();
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, [handler, refs]);
+};
+
+///--------------------------------------------------
+
+export const useBookmarkContext = () => {
+  const context = useContext(BookmarksContext);
+
+  if (!context) {
+    throw new Error(
+      "useBookmarkContext must be used within BookmarkContextProvider"
+    );
+  }
+
+  return context;
 };
