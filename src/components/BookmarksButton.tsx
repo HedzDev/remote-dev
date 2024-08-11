@@ -11,8 +11,8 @@ export default function BookmarksButton() {
         className="bookmarks-btn"
       >
         Bookmarks <TriangleDownIcon />
-        {showModal ? <BookmarksPopover /> : null}
       </button>
+      {showModal ? <BookmarksPopover /> : null}
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { BookmarksContext } from "../contexts/BookmarkContextProvider";
 import { BASE_API_URL } from "./constants";
@@ -66,7 +66,7 @@ async function fetchJobItem(id: number | null): Promise<JobItemAPIResponse> {
 
 export const useJobItem = (id: number | null) => {
   const { data, isInitialLoading } = useQuery(
-    ["job-items", id],
+    ["job-item", id],
     () => (id ? fetchJobItem(id) : null),
 
     {
@@ -81,6 +81,28 @@ export const useJobItem = (id: number | null) => {
   const isLoading = isInitialLoading;
 
   return { jobItem: data?.jobItem, isLoading } as const;
+};
+
+export const useJobItems = (ids: number[]) => {
+  const results = useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ["job-item", id],
+      queryFn: () => fetchJobItem(id),
+      enabled: Boolean(id), // only fetch data if id is truthy
+      staleTime: 1000 * 60 * 60, // 1 hour
+      refetchOnWindowFocus: false,
+      retry: false,
+      onError: handleError,
+    })),
+  });
+
+  const jobItems = results
+    .map((result) => result.data?.jobItem)
+    .filter((jobItem) => jobItem !== undefined);
+
+  const isLoading = results.some((result) => result.isLoading);
+
+  return { jobItems, isLoading };
 };
 
 // export const useJobItems = (searchText: string) => {
@@ -120,7 +142,7 @@ async function fetchJobItems(searchText: string): Promise<JobItemsAPIResponse> {
   return data;
 }
 
-export const useJobItems = (searchText: string) => {
+export const useSearchQuery = (searchText: string) => {
   const { data, isInitialLoading } = useQuery(
     // isInitialLoading is a boolean that indicates if the query is still in the initial loading state
     ["job-items", searchText],
@@ -152,12 +174,12 @@ export const useDebounce = <T>(value: T, delay = 500): T => {
   return debouncedValue;
 };
 
-export const useBookmark = () => {
+export const useBookmarkContext = () => {
   const context = useContext(BookmarksContext);
 
   if (!context) {
     throw new Error(
-      "BookmarkContext must be used within BookmarkContextProvider"
+      "useBookmarkContext must be used within BookmarkContextProvider"
     );
   }
 
