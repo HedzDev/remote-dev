@@ -15,15 +15,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <BookmarkContextProvider>
-        <SearchTextContextProvider>
-          <JobItemsContextProvider>
+      <SearchTextContextProvider>
+        <JobItemsContextProvider>
+          <BookmarkContextProvider>
             <ActiveIdContextProvider>
               <App />
             </ActiveIdContextProvider>
-          </JobItemsContextProvider>
-        </SearchTextContextProvider>
-      </BookmarkContextProvider>
+          </BookmarkContextProvider>
+        </JobItemsContextProvider>
+      </SearchTextContextProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
