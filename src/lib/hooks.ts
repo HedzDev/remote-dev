@@ -4,6 +4,9 @@ import { BookmarksContext } from "../contexts/BookmarkContextProvider";
 import { BASE_API_URL } from "./constants";
 import { JobItem, JobItemExpanded } from "./types";
 import { handleError } from "./utils";
+import { ActiveIdContext } from "../contexts/ActiveIdContextProvider";
+import { SearchTextContext } from "../contexts/SearchTextContextProvider";
+import { JobItemsContext } from "../contexts/JobItemsContextProvider";
 
 export const useActiveId = () => {
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -221,6 +224,42 @@ export const useBookmarkContext = () => {
   if (!context) {
     throw new Error(
       "useBookmarkContext must be used within BookmarkContextProvider"
+    );
+  }
+
+  return context;
+};
+
+export const useActiveIdContext = () => {
+  const context = useContext(ActiveIdContext);
+
+  if (!context) {
+    throw new Error(
+      "useActiveIdContext must be used within ActiveIdContextProvider"
+    );
+  }
+
+  return context;
+};
+
+export const useChangeSearchTextContext = () => {
+  const context = useContext(SearchTextContext);
+
+  if (!context) {
+    throw new Error(
+      "useChangeSearchTextContext must be used within SearchTextContextProvider"
+    );
+  }
+
+  return context;
+};
+
+export const useJobItemsContext = () => {
+  const context = useContext(JobItemsContext);
+
+  if (!context) {
+    throw new Error(
+      "useJobItemsContext must be used within JobItemsContextProvider"
     );
   }
 
